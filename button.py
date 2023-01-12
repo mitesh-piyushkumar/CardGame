@@ -1,7 +1,7 @@
 #imports
 import pygame
 
-#Button class
+#Button class, creates button instances
 class Button():
     def __init__(self, x, y, image):
         self.image = image
