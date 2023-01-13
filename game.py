@@ -1,6 +1,11 @@
+"""
+
+
 #imports
 import random
 import pygame
+
+from main import draw_winner_text
 
 #variables
 colors = {
@@ -30,6 +35,7 @@ def get_shuffled_deck(all_deck):
 def get_card(all_deck):
     card = all_deck[0]
     all_deck.remove(card)
+    print(f"removed card: {card}")
     return card
 
 #gets the color of the card
@@ -42,11 +48,16 @@ def get_card_number(card):
     card_number = card[len(card) - 1 : len(card)]
     return card_number
 
+
+
 #gets winning card (if two different cards are drawn)
 def get_winning_card(player1, player2, player1_card_color, player2_card_color, player1cards, player2cards, deck):
     if (player1_card_color == "red" and player2_card_color == "black"):
         player1cards.append(player1_card_color)
         player1cards.append(player2_card_color)
+        
+        draw_winner_text(player1)
+        
         print(f"{player1} won this round.")
         print(f"cards remaining: {len(deck)}")
         print(f"{player1} has {len(player1cards)} cards.")
@@ -55,6 +66,9 @@ def get_winning_card(player1, player2, player1_card_color, player2_card_color, p
     elif (player2_card_color == "red" and player1_card_color == "black"):
         player2cards.append(player1_card_color)
         player2cards.append(player2_card_color)
+        
+        draw_winner_text(player2)
+        
         print(f"{player2} won this round.")
         print(f"cards remaining: {len(deck)}")
         print(f"{player1} has {len(player1cards)} cards.")
@@ -63,6 +77,9 @@ def get_winning_card(player1, player2, player1_card_color, player2_card_color, p
     elif (player1_card_color == "yellow" and player2_card_color == "red"):
         player1cards.append(player1_card_color)
         player1cards.append(player2_card_color)
+        
+        draw_winner_text(player1)
+        
         print(f"{player1} won this round.")
         print(f"cards remaining: {len(deck)}")
         print(f"{player1} has {len(player1cards)} cards.")
@@ -71,6 +88,9 @@ def get_winning_card(player1, player2, player1_card_color, player2_card_color, p
     elif (player2_card_color == "yellow" and player1_card_color == "red"):
         player2cards.append(player1_card_color)
         player2cards.append(player2_card_color)
+        
+        draw_winner_text(player2)
+        
         print(f"{player2} won this round.")
         print(f"cards remaining: {len(deck)}")
         print(f"{player1} has {len(player1cards)} cards.")
@@ -79,6 +99,9 @@ def get_winning_card(player1, player2, player1_card_color, player2_card_color, p
     elif (player1_card_color == "black" and player2_card_color == "yellow"):
         player1cards.append(player1_card_color)
         player1cards.append(player2_card_color)
+        
+        draw_winner_text(player1)
+        
         print(f"{player1} won this round.")
         print(f"cards remaining: {len(deck)}")
         print(f"{player1} has {len(player1cards)} cards.")
@@ -87,14 +110,20 @@ def get_winning_card(player1, player2, player1_card_color, player2_card_color, p
     elif (player2_card_color == "black" and player1_card_color == "yellow"):
         player2cards.append(player1_card_color)
         player2cards.append(player2_card_color)
+        
+        draw_winner_text(player2)
+        
         print(f"{player2} won this round.")
         print(f"cards remaining: {len(deck)}")
         print(f"{player1} has {len(player1cards)} cards.")
         print(f"{player2} has {len(player2cards)} cards.")
         return player2cards
+    
+    pygame.display.update()
+    pygame.time.delay(5000)
 
 #the game
-def game(player1, player2, deck, SCORE_FONT, WHITE, WIN, WIDTH, HEIGHT):
+def game(player1, player2, SCORE_FONT, WHITE, WIN, WIDTH, HEIGHT, deck, BOARDER):
     player1_card = get_card(deck)
     player2_card = get_card(deck)
     
@@ -106,10 +135,7 @@ def game(player1, player2, deck, SCORE_FONT, WHITE, WIN, WIDTH, HEIGHT):
     
     print(f"{player1} draw the card: {player1_card}")
     print(f"{player2} draw the card: {player2_card}")
-    player1_drawn_text = SCORE_FONT.render(f"Card drawn: {player1_card}", 1, WHITE) #card is a place holder for now
-    player2_drawn_text = SCORE_FONT.render(f"Card drawn: {player2_card}", 1, WHITE) #card is a place holder for now
-    WIN.blit(player1_drawn_text, (0, 50))
-    WIN.blit(player2_drawn_text, (WIDTH-(17*16), 50))
+    
     
     if player1_card_color != player2_card_color:
         #print("Drew different cards")
@@ -118,6 +144,9 @@ def game(player1, player2, deck, SCORE_FONT, WHITE, WIN, WIDTH, HEIGHT):
         if player1_card_number > player2_card_number:
             player1cards.append(player1_card)
             player1cards.append(player2_card)
+            
+            draw_winner_text(player1)
+            
             print(f"{player1} won this round because both players drew the same color cards but {player1} had the larger number.")
             print(f"{player1} has {len(player1cards)} cards.")
             print(f"{player2} has {len(player2cards)} cards.")
@@ -125,8 +154,28 @@ def game(player1, player2, deck, SCORE_FONT, WHITE, WIN, WIDTH, HEIGHT):
         else:
             player2cards.append(player1_card)
             player2cards.append(player2_card)
+            
+            draw_winner_text(player1)
+            
             print(f"{player2} won this round because both players drew the same color cards but {player2} had the larger number.")
             print(f"{player1} has {len(player1cards)} cards.")
             print(f"{player2} has {len(player2cards)} cards.")
             print(f"cards remaining: {len(deck)}")
-    pygame.display.update() 
+    
+    
+    
+    player1_drawn_text = SCORE_FONT.render(f"Card drawn: {player1_card}", 1, WHITE) #card is a place holder for now
+    player2_drawn_text = SCORE_FONT.render(f"Card drawn: {player2_card}", 1, WHITE) #card is a place holder for now
+    
+    
+    
+    
+    
+    WIN.blit(player1_drawn_text, (0, 50))
+    WIN.blit(player2_drawn_text, (WIDTH-(17*16), 50))
+    
+    
+    pygame.display.update()
+    pygame.time.delay(5000) # 1 second = 5000 milliseconds
+    
+"""
