@@ -34,6 +34,7 @@ pygame.display.set_caption("Card game")
 VALID_USERS = ("mitesh", "bob")
 MANAGER = pygame_gui.UIManager((WIDTH, HEIGHT))
 
+
 #colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -63,10 +64,13 @@ roll_button_image = pygame.image.load(os.path.join('Assets', 'roll_button.png'))
 roll_button_pos = (WIDTH//2 - (roll_button_image.get_width())//2, 0)
 play_button_image = pygame.image.load(os.path.join('Assets', 'play_button.png'))
 play_button_pos = WIDTH//2 - (play_button_image.get_width())//2, HEIGHT//2 - (play_button_image.get_height())//2
+replay_button_image = pygame.image.load(os.path.join('Assets', 'replay_button.png'))
 
 #buttons
 roll_button = button.Button(WIDTH//2 - (roll_button_image.get_width())//2, 0, roll_button_image)
 play_button = button.Button(WIDTH//2 - (play_button_image.get_width())//2, HEIGHT//2 - (play_button_image.get_height())//2 +125, play_button_image)
+replay_button = button.Button(WIDTH//2 - (replay_button_image.get_width())//2, HEIGHT//2 - (replay_button_image.get_height())//2 +125, replay_button_image)
+
 
 #physics
 FPS = 60
@@ -84,6 +88,7 @@ def create_deck(color):
         for i in range(colors):
             card = f"{color}{i}"
             all_deck.append(card)
+        #print("all_deck")
     return all_deck
 
 #shuffles the deck of cards
@@ -182,6 +187,7 @@ def get_winning_card(player1, player2, player1_card_color, player2_card_color, p
 
 #the game
 def game(player1, player2, SCORE_FONT, WHITE, WIN, WIDTH, HEIGHT, deck, BOARDER):
+    print("check1")
     player1_card = get_card(deck)
     player2_card = get_card(deck)
     
@@ -237,12 +243,11 @@ def game(player1, player2, SCORE_FONT, WHITE, WIN, WIDTH, HEIGHT, deck, BOARDER)
     pygame.time.delay(GAME_SPEED)
 
 
-
+deck = get_shuffled_deck(create_deck(colors))
 
 """
 THE GUI LOGIC
 """
-deck = get_shuffled_deck(create_deck(colors))
 
 
 #draws the rectangles
@@ -277,17 +282,70 @@ def draw_winner_text(winner, player1, player2):
         WIN.blit(round_winner_text, (player2_winner_text_pos))
 
 #draws winner message
-def draw_winner_message(winner):
+def draw_winner(winner):
     winner_message = WINNER_FONT.render(f"{winner} won the game!!!", 1, WHITE)
     WIN.blit(winner_message, (WIDTH//2 - (winner_message.get_width() //2), HEIGHT//2 - (winner_message.get_height() //2)))
     
+    if replay_button.draw(WIN):
+        play_again = True
+        return play_again
+
     pygame.display.update()
-    pygame.time.delay(5000)
+
+#play again
+def play_again(player1, player2, clicked):
+    
+    draw_window(player1, player2, clicked)
+    
+    
 
 #draws winner menu
-def draw_winner_menu(winner):
+def draw_winner_menu(winner, player1, player2, deck):
     WIN.fill(RED)
-    draw_winner_message(winner)
+    
+    if draw_winner(winner):
+        print("clicked")
+        clicked = True
+        print("loading game again...")
+        play_again(player1, player2, clicked)
+        #run_game(player1, player2, True, deck)
+        
+    
+    
+    pygame.display.update()
+
+#loads winner menu
+def load_winner_menu(winner, player1, player2, deck):
+    run = True
+    play_again = False
+    print("winner menu...")
+    clock = pygame.time.Clock()
+    while play_again != True and run == True:
+        #print("running winner menu...")
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+            
+            MANAGER.process_events(event)
+        
+        
+        
+        
+        MANAGER.update(clock.tick(FPS)/1000)
+        
+        
+        draw_winner_menu(winner, player1, player2, deck)
+        
+        #MANAGER.draw_ui(WIN)
+        
+        pygame.display.update()
+    
+    
+    print("leaving winner menu...")
+    pygame.quit()
+    exit()
+
+
 
 
 #user validation
@@ -313,7 +371,7 @@ def add_user(name):
     
 
 #runs the game in ui
-def run_game(player1, player2, run, clicked, deck):
+def run_game(player1, player2, clicked, deck):
     print("running game...")
     
     if clicked == True:
@@ -322,8 +380,9 @@ def run_game(player1, player2, run, clicked, deck):
     
     if len(deck) == 0:
         print("game ended...")
+        create_deck(colors)
         if len(player1cards) > len(player2cards):
-            draw_winner_menu(player1)
+            load_winner_menu(player1, player1, player2, deck)
             print(f"The game ended because there are {len(deck)} cards remaining.")
             print(f"{player1} won the game because {player1} had {len(player1cards)} cards whereas {player2} had {len(player2cards)} cards.")
             run = False
@@ -331,7 +390,7 @@ def run_game(player1, player2, run, clicked, deck):
             pygame.quit()
         
         else:
-            draw_winner_menu(player1)
+            load_winner_menu(player2, player1, player2, deck)
             print(f"The game ended because there are {len(deck)} cards remaining.")
             print(f"{player2} won the game because {player2} had {len(player2cards)} cards whereas {player1} had {len(player1cards)} cards.")
             run = False
@@ -343,7 +402,7 @@ def run_game(player1, player2, run, clicked, deck):
 
 
 #draws game
-def draw_game(player1, player2, run):
+def draw_game(player1, player2, run, deck):
     WIN.fill(GREY)
     draw_rects()
     draw_texts(player1, player2)
@@ -351,7 +410,7 @@ def draw_game(player1, player2, run):
     if roll_button.draw(WIN):
         print("clicked")
         clicked = True
-        run_game(player1, player2, run, clicked, deck)
+        run_game(player1, player2, clicked, deck)
     
     #check_user_input()
     
@@ -377,7 +436,7 @@ def draw_window(player1, player2, run):
             
             MANAGER.process_events(event)
         
-        draw_game(player1, player2, run)
+        draw_game(player1, player2, run, deck)
         
         MANAGER.update(clock.tick(FPS)/1000)
         
