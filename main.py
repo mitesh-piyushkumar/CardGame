@@ -31,9 +31,12 @@ pygame.display.set_caption("Card game")
 
 #variables
 #VALID_USERS = json.loads(open('valid_users.json').read())
-VALID_USERS = ("mitesh", "bob")
+VALID_USERS = ["mitesh", "bob"]
 MANAGER = pygame_gui.UIManager((WIDTH, HEIGHT))
+VALID_USERS.append("janani")
+print(VALID_USERS)
 
+new_users = []
 
 #colors
 WHITE = (255, 255, 255)
@@ -41,19 +44,22 @@ BLACK = (0, 0, 0)
 GREY = (159, 159, 159)
 RED = (255, 0, 0)
 LIGHT_BLUE = (24, 123, 205)
+LIGHT_ORANGE = (255,103,0)
 
 #fonts
 WINNER_FONT = pygame.font.SysFont("Comic sans MS", 50)
+SIGN_UP_FONT = pygame.font.SysFont("Comic sans MS", 20)
 SCORE_FONT = pygame.font.SysFont("Comic sans MS", 30)
 CARDS_FONT = pygame.font.SysFont("Comic sans MS", 30)
 PLAYER_FRONT = pygame.font.SysFont("Comic sans MS", 30)
 
 #inputs
-PLAYER1_INPUT= pygame_gui.elements.UITextEntryLine(relative_rect = pygame.Rect((WIDTH//2 - 200, HEIGHT//2 -25 -(125//2)), (400, 50)), 
-                                                        manager = MANAGER, object_id = "#player1_input")
-PLAYER2_INPUT= pygame_gui.elements.UITextEntryLine(relative_rect = pygame.Rect((WIDTH//2 - 200, HEIGHT//2 +50 -(125//2)), (400, 50)), 
-                                                        manager = MANAGER, object_id = "#player2_input")
-
+#PLAYER1_INPUT= pygame_gui.elements.UITextEntryLine(relative_rect = pygame.Rect((WIDTH//2 - 200, HEIGHT//2 -25 -(125//2)), (400, 50)), 
+#                                                        manager = MANAGER, object_id = "#player1_input")
+#PLAYER2_INPUT= pygame_gui.elements.UITextEntryLine(relative_rect = pygame.Rect((WIDTH//2 - 200, HEIGHT//2 +50 -(125//2)), (400, 50)), 
+#                                                        manager = MANAGER, object_id = "#player2_input")
+#ADD_USER_INPUT = pygame_gui.elements.UITextEntryLine(relative_rect = pygame.Rect((WIDTH//2 - 200, HEIGHT//2 -25 -(125//2) + 100), (400, 50)), 
+#                                                        manager = MANAGER, object_id = "#add_user_input")
 
 
 #rectangles
@@ -65,11 +71,14 @@ roll_button_pos = (WIDTH//2 - (roll_button_image.get_width())//2, 0)
 play_button_image = pygame.image.load(os.path.join('Assets', 'play_button.png'))
 play_button_pos = WIDTH//2 - (play_button_image.get_width())//2, HEIGHT//2 - (play_button_image.get_height())//2
 replay_button_image = pygame.image.load(os.path.join('Assets', 'replay_button.png'))
+add_user_button_image = pygame.image.load(os.path.join('Assets', 'add_user_button.png'))
+add_user_pos = (WIDTH//2 - (add_user_button_image.get_width() //2), HEIGHT//2 +45)
 
 #buttons
 roll_button = button.Button(WIDTH//2 - (roll_button_image.get_width())//2, 0, roll_button_image)
 play_button = button.Button(WIDTH//2 - (play_button_image.get_width())//2, HEIGHT//2 - (play_button_image.get_height())//2 +125, play_button_image)
 replay_button = button.Button(WIDTH//2 - (replay_button_image.get_width())//2, HEIGHT//2 - (replay_button_image.get_height())//2 +125, replay_button_image)
+add_user_button = button.Button(WIDTH//2 - (add_user_button_image.get_width() //2), HEIGHT//2 +45, add_user_button_image)
 
 
 #physics
@@ -292,6 +301,7 @@ def draw_winner(winner):
 
     pygame.display.update()
 
+
 #play again
 def play_again(player1, player2, clicked, deck):
     
@@ -355,8 +365,8 @@ def load_winner_menu(winner, player1, player2, deck):
 
 #user validation
 def check_validation(player1, player2):
-    print("validating...")
-    if player1 and player2 in VALID_USERS:
+    print(f"validating {player1} and {player2}...")
+    if player1 in VALID_USERS and player2 in VALID_USERS:
         print("validation passed...")
         return True
     else:
@@ -423,9 +433,46 @@ def draw_game(player1, player2, run, deck):
     pygame.display.update()
 
 
-#creates the login menu
-def create_login_menu():
-    WIN.fill(LIGHT_BLUE)
+#draws the signup menu
+def draw_signup_menu():
+    print("loading signup menu...")
+    WIN.fill(LIGHT_ORANGE)
+    
+    #MANAGER.draw_ui(WIN)
+
+
+#creates the signup menu
+def load_signup_menu():
+    run = True
+    clock = clock = pygame.time.Clock()
+    while run == True:
+        #print("running signup menu...")
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+            
+            
+            if event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED and event.ui_object_id == "#add_user_input":
+                new_user = event.text
+                print(new_user)
+            
+            
+            MANAGER.process_events(event)
+        
+        draw_signup_menu()
+        
+        
+        #draw_signup_menu()
+        MANAGER.update(clock.tick(FPS)/1000)
+        
+        MANAGER.draw_ui(WIN)
+        
+        pygame.display.update()
+    
+    print("exiting...")
+    pygame.quit()
+    exit()
+
 
 
 #creates the game menu
@@ -453,10 +500,35 @@ def draw_window(player1, player2, run, deck):
     pygame.quit()
     exit()
 
+#loads signup menu
+def load_validation_text(valid):
+    passed_message = SIGN_UP_FONT.render(f"Validation passed, loading game...", 1, RED)
+    failed_message = SIGN_UP_FONT.render(f"Validation failed. Please enter a valid user or add a new user.", 1, RED)
+    
+    if valid == "passed":
+        WIN.blit(passed_message, (WIDTH//2 - (passed_message.get_width() //2), HEIGHT//2 + (HEIGHT//4) +50))
+    else:
+        WIN.blit(failed_message, (WIDTH//2 - (failed_message.get_width() //2), HEIGHT//2 + (HEIGHT//4) +50))
+    
+    MANAGER.draw_ui(WIN)
+    pygame.display.update()
+    pygame.time.delay(5000)
+
+#draw inputs
+def draw_inputs(run, signup_menu_open):
+    if run == True and signup_menu_open == False:
+        PLAYER1_INPUT= pygame_gui.elements.UITextEntryLine(relative_rect = pygame.Rect((WIDTH//2 - 200, 
+                HEIGHT//2 -25 -(125//2)), (400, 50)), manager = MANAGER, object_id = "#player1_input")
+        PLAYER2_INPUT= pygame_gui.elements.UITextEntryLine(relative_rect = pygame.Rect((WIDTH//2 - 200, 
+                HEIGHT//2 +50 -(125//2)), (400, 50)), manager = MANAGER, object_id = "#player2_input")
+    
+
 #draws the login menu
 def main_():
-    #add_user("mitesh")
+    WIN.fill(LIGHT_BLUE)
     run = True
+    signup_menu_open = False
+    draw_inputs(run, signup_menu_open)
     print("loading...")
     clock = pygame.time.Clock()
     while run == True:
@@ -464,6 +536,8 @@ def main_():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
+            
+                
             
             if event.type == pygame_gui.UI_TEXT_ENTRY_FINISHED and event.ui_object_id == "#player1_input":
                 player1 = event.text
@@ -480,18 +554,37 @@ def main_():
             MANAGER.process_events(event)
             #check_user_input()
         
+        
+        
         MANAGER.update(clock.tick(FPS)/1000)
         
-        create_login_menu()
+        #create_login_menu()
+        
+        #create_signup()
+        #if add_user_button.draw(WIN):
+        #    create_signup_menu()
+        #    print("clicked")
+        
         
         if play_button.draw(WIN):
             if check_validation(player1, player2) == True:
-                    draw_window(player1, player2, run, deck)
+                valid = "passed"
+                load_validation_text(valid)
+                draw_window(player1, player2, run, deck)
             else:
+                valid = "failed"
+                load_validation_text(valid)
+        
+        if add_user_button.draw(WIN):
+                signup_menu_open = True
+                print("clicked")
+                new_user = ADD_USER_INPUT = pygame_gui.elements.UITextEntryLine(relative_rect = pygame.Rect((WIDTH//2 - 200, HEIGHT//2 -25 -(125//2) + 100), (400, 50)), 
+                                                    manager = MANAGER, object_id = "#add_user_input")
+                load_signup_menu()
+                print("hello ")
                 
-                print("unable to validate...")
-                pygame.quit()
-                exit()
+        
+        
         
         
         MANAGER.draw_ui(WIN)
