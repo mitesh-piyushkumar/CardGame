@@ -255,14 +255,14 @@ def draw_rects():
     pygame.draw.rect(WIN, BLACK, BOARDER)
 
 #draws texts
-def draw_texts(player1, player2):
+def draw_texts(player1, player2, deck):
     player1_text = SCORE_FONT.render(f"player1: {player1}", 1, WHITE)
-    player2_text = SCORE_FONT.render(f"player1: {player2}", 1, WHITE)
+    player2_text = SCORE_FONT.render(f"player2: {player2}", 1, WHITE)
     
     player1_cards_text = CARDS_FONT.render(f"cards: {len(player1cards)}", 1, WHITE)
     player2_cards_text = CARDS_FONT.render(f"cards: {len(player2cards)}", 1, WHITE)
     
-    cards_remaining_text = CARDS_FONT.render(f"cards ramining: {len(deck)}", 1, WHITE)
+    cards_remaining_text = CARDS_FONT.render(f"cards remaining: {len(deck)}", 1, WHITE)
 
     WIN.blit(player1_cards_text, (0, HEIGHT-50))
     WIN.blit(player2_cards_text, (WIDTH//2 +6, HEIGHT-50))
@@ -293,9 +293,9 @@ def draw_winner(winner):
     pygame.display.update()
 
 #play again
-def play_again(player1, player2, clicked):
+def play_again(player1, player2, clicked, deck):
     
-    draw_window(player1, player2, clicked)
+    draw_window(player1, player2, clicked, deck)
     
     
 
@@ -307,7 +307,7 @@ def draw_winner_menu(winner, player1, player2, deck):
         print("clicked")
         clicked = True
         print("loading game again...")
-        play_again(player1, player2, clicked)
+        play_again(player1, player2, clicked, deck)
         #run_game(player1, player2, True, deck)
         
     
@@ -316,6 +316,11 @@ def draw_winner_menu(winner, player1, player2, deck):
 
 #loads winner menu
 def load_winner_menu(winner, player1, player2, deck):
+    player1cards.clear()
+    player2cards.clear()
+    
+    new_deck = get_shuffled_deck(create_deck(colors))
+    print(new_deck)
     run = True
     play_again = False
     print("winner menu...")
@@ -334,7 +339,7 @@ def load_winner_menu(winner, player1, player2, deck):
         MANAGER.update(clock.tick(FPS)/1000)
         
         
-        draw_winner_menu(winner, player1, player2, deck)
+        draw_winner_menu(winner, player1, player2, new_deck)
         
         #MANAGER.draw_ui(WIN)
         
@@ -405,7 +410,7 @@ def run_game(player1, player2, clicked, deck):
 def draw_game(player1, player2, run, deck):
     WIN.fill(GREY)
     draw_rects()
-    draw_texts(player1, player2)
+    draw_texts(player1, player2, deck)
     
     if roll_button.draw(WIN):
         print("clicked")
@@ -424,7 +429,7 @@ def create_login_menu():
 
 
 #creates the game menu
-def draw_window(player1, player2, run):
+def draw_window(player1, player2, run, deck):
     run = True
     print("loading game...")
     clock = pygame.time.Clock()
@@ -481,7 +486,7 @@ def main_():
         
         if play_button.draw(WIN):
             if check_validation(player1, player2) == True:
-                    draw_window(player1, player2, run)
+                    draw_window(player1, player2, run, deck)
             else:
                 
                 print("unable to validate...")
