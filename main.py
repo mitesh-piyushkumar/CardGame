@@ -31,9 +31,13 @@ WIN = pygame.display.set_mode((WIDTH,HEIGHT))
 pygame.display.set_caption("Card game")
 
 #variables
+#with open('valid_users.json') as users:
+#    valid_users = users.read().split('\n')
+#valid_users_file = open("valid_users.json")
+#valid_users = json.loads(valid_users_file.read())
 #valid_users = json.loads(open('valid_users.json').read())
 valid_users = ["mitesh", "bob"]
-print(valid_users)
+#print(valid_users)
 
 new_users = []
 
@@ -59,11 +63,14 @@ PLAYER_FRONT = pygame.font.SysFont("Comic sans MS", 30)
 #                                                        manager = MANAGER, object_id = "#player2_input")
 #ADD_USER_INPUT = pygame_gui.elements.UITextEntryLine(relative_rect = pygame.Rect((WIDTH//2 - 200, HEIGHT//2 -25 -(125//2) + 100), (400, 50)), 
 #                                                        manager = MANAGER, object_id = "#add_user_input")
+p1_text_message = "player1: "
 player1_input_box = input.InputBox(WIDTH//2 - 200, HEIGHT//2 -25 -(125//2), 400, 50)
+p2_text_message = "player1: "
 player2_input_box = input.InputBox(WIDTH//2 - 200, HEIGHT//2 +50 -(125//2), 400, 50)
 player_input_boxes = [player1_input_box, player2_input_box]
 
-add_user_input_box = input.InputBox(WIDTH//2 - 200, HEIGHT//2 -25 -(125//2) + 100, 400, 50)
+add_user_message = "new user's name: "
+add_user_input_box = input.InputBox(WIDTH//2 - 200, HEIGHT//2 -25 -(125//2), 400, 50)
 
 
 
@@ -382,10 +389,13 @@ def check_validation(player1, player2):
 
 #add valid user
 def add_valid_user(name):
-    print(name)
+    print(f"adding {name}...")
     valid_users.append(name)
-    print(valid_users)
     
+    #with open('valid_users.json', 'w') as valid_users:
+    #    for name in new_users:
+    #        valid_users.write(str(name)+'\n')
+    #    valid_users.close()
 
 #runs the game in ui
 def run_game(player1, player2, clicked, deck):
@@ -457,7 +467,7 @@ def load_signup_menu():
             
         
         WIN.fill(LIGHT_ORANGE)
-        new_user = add_user_input_box.draw(WIN)
+        new_user = add_user_input_box.draw(WIN, add_user_message)
         
         if adduser_button.draw(WIN):
             add_valid_user(new_user)
@@ -511,7 +521,7 @@ def load_validation_text(valid):
     
     
     pygame.display.update()
-    pygame.time.delay(5000)
+    pygame.time.delay(2000)
 
 
 
@@ -533,8 +543,9 @@ def main_():
         
         WIN.fill(LIGHT_BLUE)
         
-        player1 = player1_input_box.draw(WIN)
-        player2 = player2_input_box.draw(WIN)
+        player1 = player1_input_box.draw(WIN, p1_text_message)
+        player2 = player2_input_box.draw(WIN, p2_text_message)
+
         
         
         #create_login_menu()

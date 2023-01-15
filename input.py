@@ -17,6 +17,8 @@ LIGHT_ORANGE = (255,103,0)
 COLOR_INACTIVE = GREY
 COLOR_ACTIVE = BLACK
 FONT = pygame.font.SysFont("Comic sans MS", 30)
+MESSAGE_FONT = pygame.font.SysFont("Comic sans MS", 20)
+
 
 class InputBox:
     def __init__(self, x, y, w, h, text=''):
@@ -25,9 +27,9 @@ class InputBox:
         self.text = text
         self.txt_surface = FONT.render(text, 1, self.color)
         self.clicked = False
+        self.inputted = False
     
     def handle_event(self, event):
-        #print("running...")
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.rect.collidepoint(event.pos):
                 self.clicked = True
@@ -38,6 +40,7 @@ class InputBox:
         if event.type == pygame.KEYDOWN and self.clicked:
             if event.key == pygame.K_RETURN:
                 self.clicked = False
+                inputted = True
             elif event.key == pygame.K_BACKSPACE:
                 self.text = self.text[:-1]
             else:
@@ -45,7 +48,13 @@ class InputBox:
             self.txt_surface = FONT.render(self.text, True, self.color)
     
     
-    def draw(self, surface):
-        surface.blit(self.txt_surface, (self.rect.x, self.rect.y))
+    def draw(self, surface, message):
+        #print(message)
+        if self.inputted == False:
+            #print("not clicked...")
+            message_to_draw = FONT.render(f"{message} ", 1, self.color)
+            surface.blit(message_to_draw, (self.rect.x + 5, self.rect.y))
+        
+        surface.blit(self.txt_surface, (self.rect.x + (message_to_draw.get_width()), self.rect.y))
         pygame.draw.rect(surface, self.color, self.rect, 2)
         return self.text
