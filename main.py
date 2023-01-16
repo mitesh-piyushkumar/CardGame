@@ -24,6 +24,8 @@ colors = {
 
 player1cards = []
 player2cards = []
+p1_wins = []
+p2_wins = []
 
 #window variables
 WIDTH, HEIGHT = 900, 600
@@ -31,15 +33,15 @@ WIN = pygame.display.set_mode((WIDTH,HEIGHT))
 pygame.display.set_caption("Card game")
 
 #variables
-#with open('valid_users.json') as users:
-#    valid_users = users.read().split('\n')
+with open('valid_users.txt') as users:
+    valid_users = users.read()
 #valid_users_file = open("valid_users.json")
 #valid_users = json.loads(valid_users_file.read())
 #valid_users = json.loads(open('valid_users.json').read())
-valid_users = ["mitesh", "bob"]
+#valid_users = ["mitesh", "bob"]
 #print(valid_users)
 
-new_users = []
+#new_users = ["", ]
 
 #colors
 WHITE = (255, 255, 255)
@@ -65,12 +67,12 @@ PLAYER_FRONT = pygame.font.SysFont("Comic sans MS", 30)
 #                                                        manager = MANAGER, object_id = "#add_user_input")
 p1_text_message = "player1: "
 player1_input_box = input.InputBox(WIDTH//2 - 200, HEIGHT//2 -25 -(125//2), 400, 50)
-p2_text_message = "player1: "
+p2_text_message = "player2: "
 player2_input_box = input.InputBox(WIDTH//2 - 200, HEIGHT//2 +50 -(125//2), 400, 50)
 player_input_boxes = [player1_input_box, player2_input_box]
 
 add_user_message = "new user's name: "
-add_user_input_box = input.InputBox(WIDTH//2 - 200, HEIGHT//2 -25 -(125//2), 400, 50)
+add_user_input_box = input.InputBox(WIDTH//2 - 200, HEIGHT//2 -25 -(125//2) - 100, 400, 50)
 
 
 
@@ -92,7 +94,7 @@ roll_button = button.Button(WIDTH//2 - (roll_button_image.get_width())//2, 0, ro
 play_button = button.Button(WIDTH//2 - (play_button_image.get_width())//2, HEIGHT//2 - (play_button_image.get_height())//2 +125, play_button_image)
 replay_button = button.Button(WIDTH//2 - (replay_button_image.get_width())//2, HEIGHT//2 - (replay_button_image.get_height())//2 +125, replay_button_image)
 add_user_button = button.Button(WIDTH//2 - (add_user_button_image.get_width() //2), HEIGHT//2 +45, add_user_button_image)
-adduser_button = button.Button(WIDTH//2 - (adduser_button_image.get_width() //2), HEIGHT//2 - (adduser_button_image.get_height() //2) +125, adduser_button_image)
+adduser_button = button.Button(WIDTH//2 - (adduser_button_image.get_width() //2), HEIGHT//2 - (adduser_button_image.get_height() //2) +125 - 125, adduser_button_image)
 
 
 #physics
@@ -315,6 +317,34 @@ def draw_winner(winner):
 
     pygame.display.update()
 
+#checks for extra pixels
+def check_for_extra_pixels(player1, player2):
+    if len(player1) > len("leaderboard: "):
+        extra_pixels = len(player1) *8
+    else:
+        extra_pixels = 0
+    
+    if len(player2) > len("leaderboard: "):
+        extra_pixels = len(player2) *8
+    else:
+        extra_pixels = 0
+    return extra_pixels
+
+#draws leaderbard
+def draw_lb(player1, player2, p1_total_wins, p2_total_wins):
+
+    extra_pixels = check_for_extra_pixels(player1, player2)
+    
+    lb_rect = pygame.Rect(0, 0, 200 + (extra_pixels), 150)
+    lb_text = SCORE_FONT.render("leaderboard: ", 1, WHITE)
+    
+    p1_lb_text = SCORE_FONT.render(f"{player1}: {p1_total_wins} wins" if p1_total_wins != 1 else f"{player1}: {p1_total_wins} win" , 1, WHITE)
+    p2_lb_text = SCORE_FONT.render(f"{player2}: {p2_total_wins} wins" if p2_total_wins != 1 else f"{player2}: {p2_total_wins} win" , 1, WHITE)
+    
+    pygame.draw.rect(WIN, GREY, lb_rect)
+    WIN.blit(lb_text, (0, 0))
+    WIN.blit(p1_lb_text, (0, 50))
+    WIN.blit(p2_lb_text, (0, 100))
 
 #play again
 def play_again(player1, player2, clicked, deck):
@@ -323,9 +353,34 @@ def play_again(player1, player2, clicked, deck):
     
     
 
+#stores wins
+def store_p1_wins(player1, player2, p1_win, p2_win, winner):
+    if winner == player1:
+        p1_wins.append(p1_win)
+        print(p1_wins)
+    if winner == player2:
+        p2_wins.append(p2_win)
+        print(p2_wins)
+
+def store_p2_wins(player2, winner, p2_win):
+    if winner == player2:
+        p2_wins.append(p2_win)
+        print(p2_wins)
+
 #draws winner menu
-def draw_winner_menu(winner, player1, player2, deck):
+def draw_winner_menu(winner, player1, player2, deck, p1_total_wins, p2_total_wins):
+    
+    #p1_win = 1
+    #p2_win = 1
+    
+    #store_p1_wins(player1, winner, p1_win)
+    #store_p2_wins(player2, winner, p2_win)
+    
+    #p1_total_wins = len(p1_wins)
+    #p2_total_wins = len(p2_wins)
+    
     WIN.fill(RED)
+    draw_lb(player1, player2, p1_total_wins, p2_total_wins)
     
     if draw_winner(winner):
         print("clicked")
@@ -342,6 +397,14 @@ def draw_winner_menu(winner, player1, player2, deck):
 def load_winner_menu(winner, player1, player2, deck):
     player1cards.clear()
     player2cards.clear()
+    
+    p1_win = 1
+    p2_win = 1
+    
+    store_p1_wins(player1, player2, p1_win, p2_win, winner)
+    
+    p1_total_wins = len(p1_wins)
+    p2_total_wins = len(p2_wins)
     
     new_deck = get_shuffled_deck(create_deck(colors))
     print(new_deck)
@@ -363,7 +426,9 @@ def load_winner_menu(winner, player1, player2, deck):
         #MANAGER.update(clock.tick(FPS)/1000)
         
         
-        draw_winner_menu(winner, player1, player2, new_deck)
+        draw_winner_menu(winner, player1, player2, new_deck, p1_total_wins, p2_total_wins)
+        
+        
         
         #MANAGER.draw_ui(WIN)
         
@@ -380,22 +445,22 @@ def load_winner_menu(winner, player1, player2, deck):
 #user validation
 def check_validation(player1, player2):
     print(f"validating {player1} and {player2}...")
-    if player1 in valid_users and player2 in valid_users:
-        print("validation passed...")
-        return True
-    else:
-        print("validation failed...")
-        return False
+    if player1.isalpha() and player2.isalpha():
+        if player1 in valid_users and player2 in valid_users:
+            print("validation passed...")
+            return True
+        else:
+            print("validation failed...")
+            return False
 
 #add valid user
 def add_valid_user(name):
+    new_users = ["", name]
     print(f"adding {name}...")
-    valid_users.append(name)
-    
-    #with open('valid_users.json', 'w') as valid_users:
-    #    for name in new_users:
-    #        valid_users.write(str(name)+'\n')
-    #    valid_users.close()
+    #valid_users.append(name)
+    #new_users.append(name)
+    with open('valid_users.txt', 'a') as f:
+        f.write("\n".join(new_users))
 
 #runs the game in ui
 def run_game(player1, player2, clicked, deck):
