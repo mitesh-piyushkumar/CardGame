@@ -44,8 +44,8 @@ pygame.display.set_caption("Card game")
 #variables
 VALID_USERS_PATH = "./data/valid_users.txt"
 
-with open(VALID_USERS_PATH) as users:
-    valid_users = users.read()
+#with open(VALID_USERS_PATH) as users:
+#    valid_users = users.read()
 #valid_users_file = open("valid_users.json")
 #valid_users = json.loads(valid_users_file.read())
 #valid_users = json.loads(open('valid_users.json').read())
@@ -61,6 +61,7 @@ GREY = (159, 159, 159)
 RED = (255, 0, 0)
 LIGHT_BLUE = (24, 123, 205)
 LIGHT_ORANGE = (255,103,0)
+LIGHT_PURPLE = (138,43,226) 
 
 #fonts
 WINNER_FONT = pygame.font.SysFont("Comic sans MS", 50)
@@ -68,6 +69,8 @@ SIGN_UP_FONT = pygame.font.SysFont("Comic sans MS", 20)
 SCORE_FONT = pygame.font.SysFont("Comic sans MS", 30)
 CARDS_FONT = pygame.font.SysFont("Comic sans MS", 30)
 PLAYER_FRONT = pygame.font.SysFont("Comic sans MS", 30)
+LB_FONT = pygame.font.SysFont("Comic sans MS", 30)
+
 
 #inputs
 #PLAYER1_INPUT= pygame_gui.elements.UITextEntryLine(relative_rect = pygame.Rect((WIDTH//2 - 200, HEIGHT//2 -25 -(125//2)), (400, 50)), 
@@ -99,6 +102,9 @@ replay_button_image = pygame.image.load(os.path.join('Assets', 'replay_button.pn
 add_user_button_image = pygame.image.load(os.path.join('Assets', 'add_user_button.png'))
 add_user_pos = (WIDTH//2 - (add_user_button_image.get_width() //2), HEIGHT//2 +45)
 adduser_button_image = pygame.image.load(os.path.join('Assets', "adduser_button.png"))
+home_button_image = pygame.transform.scale(pygame.image.load(os.path.join('Assets', 'home_button.png')), (50, 50))
+back_button_image = pygame.transform.scale(pygame.image.load(os.path.join('Assets', 'back_button.png')), (50, 50))
+global_lb_button_image = pygame.image.load(os.path.join('Assets', 'global_lb.png'))
 
 #buttons
 roll_button = button.Button(WIDTH//2 - (roll_button_image.get_width())//2, 0, roll_button_image)
@@ -106,6 +112,10 @@ play_button = button.Button(WIDTH//2 - (play_button_image.get_width())//2, HEIGH
 replay_button = button.Button(WIDTH//2 - (replay_button_image.get_width())//2, HEIGHT//2 - (replay_button_image.get_height())//2 +125, replay_button_image)
 add_user_button = button.Button(WIDTH//2 - (add_user_button_image.get_width() //2), HEIGHT//2 +45, add_user_button_image)
 adduser_button = button.Button(WIDTH//2 - (adduser_button_image.get_width() //2), HEIGHT//2 - (adduser_button_image.get_height() //2) +125 - 125, adduser_button_image)
+home_button = button.Button(WIDTH - home_button_image.get_width(), 0, home_button_image)
+back_button = button.Button(WIDTH - back_button_image.get_width() - 50, 0, back_button_image)
+global_lb_button = button.Button(WIDTH//2 - (global_lb_button_image.get_width() //2), HEIGHT//2 +45, global_lb_button_image)
+
 
 
 #physics
@@ -279,7 +289,7 @@ def game(player1, player2, SCORE_FONT, WHITE, WIN, WIDTH, HEIGHT, deck, BOARDER)
     pygame.time.delay(GAME_SPEED)
 
 
-deck = get_shuffled_deck(create_deck(colors))
+#deck = get_shuffled_deck(create_deck(colors))
 
 """
 THE GUI LOGIC
@@ -343,7 +353,6 @@ def check_for_extra_pixels(player1, player2):
 
 #draws leaderbard
 def draw_lb(player1, player2, p1_total_wins, p2_total_wins):
-
     extra_pixels = check_for_extra_pixels(player1, player2)
     
     lb_rect = pygame.Rect(0, 0, 200 + (extra_pixels), 150)
@@ -357,121 +366,113 @@ def draw_lb(player1, player2, p1_total_wins, p2_total_wins):
     WIN.blit(p1_lb_text, (0, 50))
     WIN.blit(p2_lb_text, (0, 100))
 
-#draws global leaderboard
-def draw_glb():
-    glb_rect = pygame.Rect(WIDTH -300, 0, 300, HEIGHT)
+#draws global lb
+def draw_glb(winner, player1, player2, deck, p1_total_wins, p2_total_wins):
+    WIN.fill(LIGHT_ORANGE)
+    
+    if back_button.draw(WIN):
+        print("clicked back button")
+        load_winner_menu(winner, player1, player2, deck, p1_total_wins, p2_total_wins)
+    
     glb_text = SCORE_FONT.render("global leaderboard: ", 1, WHITE)
     
-    pygame.draw.rect(WIN, GREY, glb_rect)
-    WIN.blit(glb_text, (WIDTH -300, 0))
+    records = db.records("SELECT * FROM leaderboard ORDER BY wins DESC")
+    x = 0
+    y = 0
+    
+    for rec in records:
+        player = rec[0]
+        player_wins = rec[1]
+        #print(f"{player} has {player_wins} wins.")
+        p_w_message = LB_FONT.render(f"{player} has {player_wins} wins.", 1, WHITE)
+        y += p_w_message.get_height() + 5
+        x = 0 if y != HEIGHT - p_w_message.get_height() - 5 else 0 + p_w_message.get_width() + 5
+        
+        WIN.blit(p_w_message, (x, y))
+    
+    WIN.blit(glb_text, (WIDTH//2 - (glb_text.get_width() //2), 0))
+    pygame.display.update()
 
+#loads global leaderboard
+def load_glb(winner, player1, player2, deck, p1_total_wins, p2_total_wins):
+    run = True
+    clock = pygame.time.Clock()
+    while run == True:
+        clock.tick(FPS)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+        
+        draw_glb(winner, player1, player2, deck, p1_total_wins, p2_total_wins)
+        
+        pygame.display.update()
 
+    print("exiting...")
+    pygame.quit()
+    exit()
 
 #play again
-def play_again(player1, player2, clicked, deck):
+def play_again_(player1, player2, clicked, deck):
     
     draw_window(player1, player2, clicked, deck)
-    
-    
 
 #stores wins
 def store_wins(player1, player2, p1_win, p2_win, winner):
     if winner == player1:
         p1_win += 1
-        
         print(f"{player1}: {p1_win}")
         p1_wins.append(p1_win)
-        #wins = len(p1_wins)
-        #print(f"{player1}: {wins}")
         db.execute("UPDATE leaderboard SET Wins = Wins + ? WHERE PlayerName = ?", p1_win, player1)
         db.commit()
+    
     if winner == player2:
         p2_win += 1
-        
-        print(f"{player1}: {p2_win}")
+        print(f"{player2}: {p2_win}")
         p2_wins.append(p2_win)
-        #wins = len(p2_wins)
-        #print(f"{player2}: {wins}")
         db.execute("UPDATE leaderboard SET Wins = Wins + ? WHERE PlayerName = ?", p2_win, player2)
         db.commit()
-        
-
-
-#draws winner menu
-def draw_winner_menu(winner, player1, player2, deck, p1_total_wins, p2_total_wins):
-    
-    #p1_win = 1
-    #p2_win = 1
-    
-    #store_p1_wins(player1, winner, p1_win)
-    #store_p2_wins(player2, winner, p2_win)
-    
-    #p1_total_wins = len(p1_wins)
-    #p2_total_wins = len(p2_wins)
-    
-    WIN.fill(RED)
-    draw_lb(player1, player2, p1_total_wins, p2_total_wins)
-    draw_glb()
-    
-    if draw_winner(winner):
-        print("clicked")
-        clicked = True
-        print("loading game again...")
-        play_again(player1, player2, clicked, deck)
-        #run_game(player1, player2, True, deck)
-        
-    
-    
-    pygame.display.update()
 
 #loads winner menu
-def load_winner_menu(winner, player1, player2, deck):
+def load_winner_menu(winner, player1, player2, deck, p1_total_wins, p2_total_wins):
     player1cards.clear()
     player2cards.clear()
     
-    p1_win = 0
-    p2_win = 0
-    
-    store_wins(player1, player2, p1_win, p2_win, winner)
-    
-    p1_total_wins = len(p1_wins)
-    p2_total_wins = len(p2_wins)
-    
-    new_deck = get_shuffled_deck(create_deck(colors))
-    print(new_deck)
+    deck = get_shuffled_deck(create_deck(colors))
+    print(deck)
     run = True
     play_again = False
     print("winner menu...")
     clock = pygame.time.Clock()
     while play_again != True and run == True:
+        clock.tick(FPS)
         #print("running winner menu...")
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
-            
-            #MANAGER.process_events(event)
         
+        WIN.fill(LIGHT_PURPLE)
         
+        draw_lb(player1, player2, p1_total_wins, p2_total_wins)
+    
+        if global_lb_button.draw(WIN):
+            print("clicked global leaderboard")
+            load_glb(winner, player1, player2, deck, p1_total_wins, p2_total_wins)
         
+        if home_button.draw(WIN):
+            main_()
         
-        #MANAGER.update(clock.tick(FPS)/1000)
-        
-        
-        draw_winner_menu(winner, player1, player2, new_deck, p1_total_wins, p2_total_wins)
-        
-        
-        
-        #MANAGER.draw_ui(WIN)
+        if draw_winner(winner):
+            print("clicked")
+            clicked = True
+            print("loading game again...")
+            play_again_(player1, player2, clicked, deck)
+            #run_game(player1, player2, True, deck)
         
         pygame.display.update()
-    
     
     print("leaving winner menu...")
     pygame.quit()
     exit()
-
-
-
 
 #user validation
 def check_validation(player1, player2):
@@ -493,6 +494,12 @@ def add_valid_user(name):
 def run_game(player1, player2, clicked, deck):
     print("running game...")
     
+    p1_win = 0
+    p2_win = 0
+    
+    new_deck = get_shuffled_deck(create_deck(colors))
+    print(new_deck)
+    
     if clicked == True:
         print(len(deck))
         game(player1, player2, SCORE_FONT, WHITE, WIN, WIDTH, HEIGHT, deck, BOARDER)
@@ -501,7 +508,13 @@ def run_game(player1, player2, clicked, deck):
         print("game ended...")
         create_deck(colors)
         if len(player1cards) > len(player2cards):
-            load_winner_menu(player1, player1, player2, deck)
+            winner = player1
+            store_wins(player1, player2, p1_win, p2_win, winner)
+            
+            p1_total_wins = len(p1_wins)
+            p2_total_wins = len(p2_wins)
+            
+            load_winner_menu(player1, player1, player2, deck, p1_total_wins, p2_total_wins)
             print(f"The game ended because there are {len(deck)} cards remaining.")
             print(f"{player1} won the game because {player1} had {len(player1cards)} cards whereas {player2} had {len(player2cards)} cards.")
             run = False
@@ -509,14 +522,18 @@ def run_game(player1, player2, clicked, deck):
             pygame.quit()
         
         else:
-            load_winner_menu(player2, player1, player2, deck)
+            winner = player2
+            store_wins(player1, player2, p1_win, p2_win, winner)
+            
+            p1_total_wins = len(p1_wins)
+            p2_total_wins = len(p2_wins)
+            
+            load_winner_menu(player2, player1, player2, deck, p1_total_wins, p2_total_wins)
             print(f"The game ended because there are {len(deck)} cards remaining.")
             print(f"{player2} won the game because {player2} had {len(player2cards)} cards whereas {player1} had {len(player1cards)} cards.")
             run = False
             pygame.quit()
             exit()
-
-
 
 
 
@@ -554,9 +571,7 @@ def load_signup_menu():
                 added_user = not added_user
             
             add_user_input_box.handle_event(event)
-            
-            
-            
+        
         
         WIN.fill(LIGHT_ORANGE)
         new_user = add_user_input_box.draw(WIN, add_user_message)
@@ -565,8 +580,6 @@ def load_signup_menu():
             add_valid_user(new_user)
             print("added")
             main_()
-            
-        
         
         pygame.display.update()
     
@@ -574,14 +587,13 @@ def load_signup_menu():
     pygame.quit()
     exit()
 
-
-
 #creates the game menu
 def draw_window(player1, player2, run, deck):
     run = True
     print("loading game...")
     clock = pygame.time.Clock()
     while run == True:
+        clock.tick(FPS)
         #print("running game...")
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -590,10 +602,6 @@ def draw_window(player1, player2, run, deck):
             
         
         draw_game(player1, player2, run, deck)
-        
-        
-        
-        #MANAGER.draw_ui(WIN)
         
         pygame.display.update()
     
@@ -619,9 +627,9 @@ def load_validation_text(valid):
 
 #draws the login menu
 def main_():
+    deck = get_shuffled_deck(create_deck(colors))
     run = True
-    signup_menu_open = False
-    print("loading...")
+    print("loading main...")
     clock = pygame.time.Clock()
     while run == True:
         #print("running login menu...")
@@ -637,12 +645,7 @@ def main_():
         
         player1 = player1_input_box.draw(WIN, p1_text_message)
         player2 = player2_input_box.draw(WIN, p2_text_message)
-
         
-        
-        #create_login_menu()
-        
-        #create_signup()
         if add_user_button.draw(WIN):
             print("clicked")
             load_signup_menu()
@@ -667,37 +670,10 @@ def main_():
                 valid = "passed"
                 load_validation_text(valid)
                 draw_window(player1, player2, run, deck)
-            
-            
-            #if player1 not in all_players and player2 not in all_players:
-            #    #if player1 not in all_players:
-            #    #    print(f"{player2} is not in the database...")
-            #    #else:
-            #    #    print(f"{player1} is not in the database...")
-            #    
-            #    if check_validation(player1, player2) == True:
-            #        players = [(player1, 0), (player2, 0)]
-            #        valid = "passed"
-            #    
-            #        db.multiexec("insert into leaderboard values (?, ?)", players)
-            #        db.commit()
-            #
-            #        load_validation_text(valid)
-            #        draw_window(player1, player2, run, deck)
-            #    
-            #    else:
-            #        valid = "failed"
-            #        load_validation_text(valid)
-            #
-            #else:
-            #    print("both players in the database...")
-            #    valid = "passed"
-            #    load_validation_text(valid)
-            #    draw_window(player1, player2, run, deck)
-
-                
+        
         pygame.display.update()
-
+    
+    
     print("exiting...")
     pygame.quit()
     exit()
